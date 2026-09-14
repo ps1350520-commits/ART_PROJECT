@@ -6,18 +6,46 @@ import { Environment, Lightformer, OrbitControls, Preload } from "@react-three/d
 import * as THREE from "three";
 import ArtworkModel from "./ArtworkModel";
 import { CALLOUTS } from "@/content/callouts";
-import { CAMERA_TRACK, SECTIONS, SECTION_RANGES, sectionIndexAt } from "@/lib/sections";
+import { CAMERA_TRACK, SECTIONS } from "@/lib/sections";
 import type { PartKey } from "@/lib/sections";
-import { clamp, damp, remap, smoothstep } from "@/lib/math";
-import { getScroll, prefersReducedMotion } from "@/lib/scroll";
+import { clamp, damp, smoothstep } from "@/lib/math";
+import { getBuild, getCameraTrack, getScroll, prefersReducedMotion } from "@/lib/scroll";
 import { clearAnchors, sceneReady, writeAnchor } from "@/lib/projection";
 
 const PART_KEYS: PartKey[] = ["turret", "gun", "runningGear", "hull", "deck", "diorama"];
 const DIM_LEVEL = 0.2;
 
+/** The screen shape every camera keyframe was composed against. */
+const DESIGN_ASPECT = 16 / 9;
+/** The vertical lens never opens past this; distance takes over instead. */
+const MAX_FOV = 70;
+const RAD = Math.PI / 180;
+
+/**
+ * A three.js `fov` is vertical, so a narrow viewport keeps the framing
+ * top-to-bottom and crops the sides — on a phone the model arrives filling
+ * the whole screen with its nose and tail off the edges.
+ *
+ * Opening the vertical fov holds the *horizontal* angle at what the
+ * keyframes were composed for, which is what actually frames a vehicle
+ * three times longer than it is tall. Past `MAX_FOV` the correction is
+ * taken as camera distance rather than lens, so a portrait phone pulls
+ * back instead of going fish-eye.
+ */
+const fitToAspect = (fov: number, aspect: number) => {
+  if (!(aspect > 0) || aspect >= DESIGN_ASPECT) return { fov, pull: 1 };
+  const halfHorizontal = Math.atan(Math.tan((fov * RAD) / 2) * DESIGN_ASPECT);
+  const needed = (2 * Math.atan(Math.tan(halfHorizontal) / aspect)) / RAD;
+  const capped = Math.min(needed, MAX_FOV);
+  return {
+    fov: capped,
+    pull: Math.tan((needed * RAD) / 2) / Math.tan((capped * RAD) / 2),
+  };
+};
+
 /** Weight given to each part at a given scroll position. */
-const focusTargets = (progress: number): Record<PartKey, number> => {
-  const section = SECTIONS[sectionIndexAt(progress)];
+const focusTargets = (index: number): Record<PartKey, number> => {
+  const section = SECTIONS[index];
   const overall = section.dim ?? 1;
   const out = {} as Record<PartKey, number>;
   for (const key of PART_KEYS) {
@@ -25,19 +53,6 @@ const focusTargets = (progress: number): Record<PartKey, number> => {
     out[key] = lit * overall;
   }
   return out;
-};
-
-/**
- * Assembly progress across the timeline section: the model lifts apart on
- * entry, then rebuilds in the four stages INFO.md describes. Everywhere
- * else it stays fully built.
- */
-const buildTarget = (progress: number) => {
-  const range = SECTION_RANGES.assembly;
-  if (progress <= range.start || progress >= range.end) return 1;
-  const local = (progress - range.start) / (range.end - range.start);
-  if (local < 0.1) return 1 - smoothstep(local / 0.1);
-  return smoothstep(remap(local, 0.1, 0.92));
 };
 
 /**
@@ -73,20 +88,30 @@ function ScrollRig({
 
   useFrame((_, rawDelta) => {
     const dt = Math.min(rawDelta, 1 / 20);
-    const progress = getScroll().progress;
+    const scroll = getScroll();
+    const progress = scroll.progress;
 
     /* ---- interpolate the camera track ---- */
+    // Measured from the laid-out document, so the keyframes stay aligned
+    // with the copy panels whatever height a section ends up at.
+    const track = getCameraTrack();
     let i = 0;
-    while (i < CAMERA_TRACK.length - 1 && progress > CAMERA_TRACK[i + 1].t) i++;
-    const a = CAMERA_TRACK[i];
-    const b = CAMERA_TRACK[Math.min(i + 1, CAMERA_TRACK.length - 1)];
+    while (i < track.length - 1 && progress > track[i + 1].t) i++;
+    const a = track[i];
+    const b = track[Math.min(i + 1, track.length - 1)];
     const span = b.t - a.t;
     const k = smoothstep(span > 0 ? clamp((progress - a.t) / span) : 0);
 
     desiredPos.copy(a.positionVec).lerp(b.positionVec, k);
     desiredTarget.copy(a.targetVec).lerp(b.targetVec, k);
-    const fov = a.fov + (b.fov - a.fov) * k;
     const yaw = a.modelYaw + (b.modelYaw - a.modelYaw) * k;
+
+    // Keep the composed horizontal framing whatever shape the screen is.
+    const fitted = fitToAspect(a.fov + (b.fov - a.fov) * k, size.width / size.height);
+    const fov = fitted.fov;
+    if (fitted.pull > 1) {
+      desiredPos.sub(desiredTarget).multiplyScalar(fitted.pull).add(desiredTarget);
+    }
 
     // Slide the look-at point sideways so a text column can sit beside the
     // model on wide screens. Narrow screens keep it centred.
@@ -103,11 +128,11 @@ function ScrollRig({
       groupRef.current.rotation.y = damp(groupRef.current.rotation.y, yaw, 3.6, dt);
     }
 
-    const targets = focusTargets(progress);
+    const targets = focusTargets(scroll.sectionIndex);
     for (const key of PART_KEYS) {
       focusRef.current[key] = damp(focusRef.current[key], targets[key], 5, dt);
     }
-    buildRef.current = damp(buildRef.current, buildTarget(progress), 9, dt);
+    buildRef.current = damp(buildRef.current, getBuild(), 9, dt);
 
     /* ---- camera ---- */
     if (!orbitEnabled) {

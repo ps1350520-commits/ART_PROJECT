@@ -19,6 +19,7 @@ export type SectionId =
   | PartKey
   | "assembly"
   | "specs"
+  | "film"
   | "closing";
 
 export interface CameraKeyframe {
@@ -196,6 +197,20 @@ export const SECTIONS: SectionDef[] = [
     },
   },
   {
+    id: "film",
+    vh: 140,
+    focus: null,
+    // The clip takes the whole screen, so the model is pulled back and
+    // faded almost to black behind the blackout.
+    dim: 0.04,
+    camera: {
+      position: [0, 6.0, 24.0],
+      target: [0, 1.2, 0],
+      modelYaw: -1.6,
+      fov: 32,
+    },
+  },
+  {
     id: "closing",
     vh: 170,
     focus: null,
@@ -229,27 +244,41 @@ export const SECTION_RANGES: Record<SectionId, { start: number; end: number; cen
     return out;
   })();
 
+/** The camera keyframe of every section, without a position on the track. */
+const FRAMES = SECTIONS.map((s) => ({
+  id: s.id,
+  bias: s.bias ?? 0,
+  ...s.camera,
+  positionVec: new THREE.Vector3(...s.camera.position),
+  targetVec: new THREE.Vector3(...s.camera.target),
+}));
+
 /**
  * Two keyframes per section: the camera *arrives* just after that
  * section's copy appears, then *holds* that exact frame until the copy
  * unpins and scrolls away. All the movement therefore happens between
  * sections, never underneath the text being read.
+ *
+ * The track is built from whatever section ranges it is handed. At runtime
+ * those are measured from the laid-out document (see `lib/scroll`), so the
+ * camera keeps step with the copy even when a section renders taller than
+ * the `vh` figure declared here.
  */
-export const CAMERA_TRACK = SECTIONS.flatMap((s, i) => {
-  const { start, end } = SECTION_RANGES[s.id];
-  const span = end - start;
-  const frame = {
-    id: s.id,
-    bias: s.bias ?? 0,
-    ...s.camera,
-    positionVec: new THREE.Vector3(...s.camera.position),
-    targetVec: new THREE.Vector3(...s.camera.target),
-  };
-  return [
-    { ...frame, t: i === 0 ? 0 : start + span * 0.09 },
-    { ...frame, t: start + span * (s.holdUntil ?? 0.46) },
-  ];
-});
+export const makeCameraTrack = (rangeOf: (id: SectionId) => { start: number; end: number }) =>
+  SECTIONS.flatMap((s, i) => {
+    const { start, end } = rangeOf(s.id);
+    const span = end - start;
+    const frame = FRAMES[i];
+    return [
+      { ...frame, t: i === 0 ? 0 : start + span * 0.09 },
+      { ...frame, t: start + span * (s.holdUntil ?? 0.46) },
+    ];
+  });
+
+/** Fallback track from the declared heights, used until the first measure. */
+export const CAMERA_TRACK = makeCameraTrack((id) => SECTION_RANGES[id]);
+
+export type CameraTrack = ReturnType<typeof makeCameraTrack>;
 
 export const sectionIndexAt = (progress: number) => {
   for (let i = 0; i < SECTIONS.length; i++) {

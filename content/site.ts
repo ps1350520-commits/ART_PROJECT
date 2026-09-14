@@ -667,6 +667,51 @@ export const VEHICLE_SPECS: SpecRow[] = [
   },
 ];
 
+/* --------------------------- mobile gate ---------------------------- */
+
+/** The portrait-phone screen that asks for landscape before the page. */
+export const MOBILE_GATE = {
+  heading: { th: "หมุนจอเป็นแนวนอน", en: "Turn your phone sideways" },
+  body: {
+    th: "หน้านี้จัดวางสำหรับจอแนวนอน โมเดลจะอยู่กลางจอและคำอธิบายอยู่ด้านข้าง",
+    en: "This page is laid out for a landscape screen: the model in the middle, the notes beside it.",
+  },
+  fullscreen: { th: "เข้าโหมดเต็มจอ", en: "Go full screen" },
+  dismiss: { th: "ดูแบบแนวตั้งต่อไป", en: "Carry on in portrait" },
+} as const;
+
+/* ------------------------------- film ------------------------------- */
+
+/**
+ * The clip the group filmed of the finished model. Everything here
+ * describes the presentation, not the footage: nothing is claimed about
+ * what the film shows beyond it being the artwork.
+ */
+export const FILM = {
+  eyebrow: { th: "คลิปผลงาน", en: "Film" },
+  heading: {
+    th: "ผลงานในคลิปวิดีโอ",
+    en: "The model on film",
+  },
+  src: "/video/tiger-film.mp4",
+  poster: "/video/tiger-film-poster.jpg",
+  hint: {
+    th: "เลื่อนต่อได้ตลอดเวลา",
+    en: "Scroll on whenever you like",
+  },
+  /** Shown during the short pause that catches a fast scroll. */
+  catchNote: {
+    th: "กำลังเริ่มคลิป…",
+    en: "Starting the film…",
+  },
+  replay: { th: "เล่นอีกครั้ง", en: "Replay" },
+  play: { th: "เล่นคลิป", en: "Play the clip" },
+  sound: { th: "เปิดเสียง", en: "Sound on" },
+  muted: { th: "ปิดเสียง", en: "Sound off" },
+  /** Shown when the browser forced the clip to start silent. */
+  soundPrompt: { th: "แตะเพื่อเปิดเสียง", en: "Tap for sound" },
+} as const;
+
 /* ----------------------------- closing ------------------------------ */
 
 export const CLOSING = {
@@ -682,6 +727,39 @@ export const CLOSING = {
   },
   sourcesHeading: { th: "แหล่งอ้างอิงข้อมูลประวัติศาสตร์", en: "Historical sources" },
 } as const;
+
+/* ----------------------------- photos ------------------------------- */
+
+/** One photograph of the finished piece, as shown in the light-box. */
+export interface Photo {
+  src: string;
+  alt: Bi;
+  /** What the shot is of, used as the light-box caption heading. */
+  title: Bi;
+}
+
+/**
+ * Every photograph on the page, in reading order. The light-box steps
+ * through this one list wherever a photo is clicked, so a visitor who
+ * opens one image can browse the whole set without going back.
+ */
+export const ALL_PHOTOS: Photo[] = [
+  ...STORY.gallery.map((shot) => ({
+    src: shot.src,
+    alt: shot.alt,
+    title: { th: "ผลงานที่เสร็จแล้ว", en: "The finished model" },
+  })),
+  ...PARTS.map((part) => ({
+    src: part.photo.src,
+    alt: part.photo.alt,
+    title: part.name,
+  })),
+].filter(
+  (photo, i, all) => all.findIndex((other) => other.src === photo.src) === i
+);
+
+/** Index of a photograph within `ALL_PHOTOS`; -1 when it is not listed. */
+export const photoIndexOf = (src: string) => ALL_PHOTOS.findIndex((p) => p.src === src);
 
 /** De-duplicated bibliography across all part sections. */
 export const ALL_SOURCES = Array.from(new Set(PARTS.flatMap((p) => p.sources))).sort();
@@ -699,5 +777,6 @@ export const NAV_LABELS: Record<string, Bi> = {
   diorama: { th: "ฐานจำลอง", en: "Diorama" },
   assembly: { th: "การประกอบ", en: "Assembly" },
   specs: { th: "ข้อมูลจำเพาะ", en: "Specs" },
+  film: { th: "คลิปผลงาน", en: "Film" },
   closing: { th: "ผู้จัดทำ", en: "Credits" },
 };

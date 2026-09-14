@@ -3,9 +3,11 @@
 import { Component, useCallback, useEffect, useState } from "react";
 import type { ReactNode } from "react";
 import dynamic from "next/dynamic";
-import Image from "next/image";
 import CalloutOverlay from "./CalloutOverlay";
+import FilmSection from "./FilmSection";
+import { OverlayProvider, PhotoFrame } from "./Overlay";
 import LoadingScreen from "./LoadingScreen";
+import MobileGate from "./MobileGate";
 import ProgressNav from "./ProgressNav";
 import {
   Assembly,
@@ -62,83 +64,88 @@ export default function Showcase() {
 
   if (reduced) {
     return (
-      <StaticMode.Provider value={true}>
-        <main className="mx-auto max-w-none">
-          <div className="relative mx-auto max-w-6xl px-5 pt-16 sm:px-8">
-            <div className="relative aspect-[16/9] overflow-hidden rounded-sm border border-steel-700/70">
-              <Image
+      <OverlayProvider>
+        <StaticMode.Provider value={true}>
+          <MobileGate />
+          <main className="mx-auto max-w-none">
+            <div className="relative mx-auto max-w-6xl px-5 pt-16 sm:px-8">
+              <PhotoFrame
                 src="/photos/hero-front-quarter.jpg"
                 alt={STORY.gallery[0].alt.th}
-                fill
                 priority
                 sizes="(max-width: 1152px) 100vw, 72rem"
-                className="object-cover"
+                className="aspect-[16/9]"
               />
+              <p className="mt-3 text-[0.72rem] text-steel-400">
+                แสดงผลแบบภาพนิ่งตามการตั้งค่าลดการเคลื่อนไหวของอุปกรณ์ ·{" "}
+                <span lang="en">
+                  Shown as a static page because this device requests reduced motion.
+                </span>
+              </p>
             </div>
-            <p className="mt-3 text-[0.72rem] text-steel-400">
-              แสดงผลแบบภาพนิ่งตามการตั้งค่าลดการเคลื่อนไหวของอุปกรณ์ ·{" "}
-              <span lang="en">
-                Shown as a static page because this device requests reduced motion.
-              </span>
-            </p>
-          </div>
-          <Hero />
-          <Overview />
-          <PartSections />
-          <Assembly />
-          <Specs />
-          <Closing />
-        </main>
-      </StaticMode.Provider>
+            <Hero />
+            <Overview />
+            <PartSections />
+            <Assembly />
+            <Specs />
+            <FilmSection />
+            <Closing />
+          </main>
+        </StaticMode.Provider>
+      </OverlayProvider>
     );
   }
 
   const orbitEnabled = section.id === "closing";
 
   return (
-    <StaticMode.Provider value={false}>
-      <LoadingScreen done={ready} />
-      <ProgressNav activeIndex={index} />
+    <OverlayProvider>
+      <StaticMode.Provider value={false}>
+        <MobileGate />
+        <LoadingScreen done={ready} />
+        <ProgressNav activeIndex={index} />
 
-      <a
-        href="#specs"
-        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded focus:bg-steel-900 focus:px-4 focus:py-2 focus:text-sm"
-      >
-        ข้ามไปยังข้อมูลจำเพาะ
-      </a>
-
-      <main className="relative">
-        {/* The 3D scene stays pinned for the whole document. */}
-        <div
-          className={`sticky top-0 z-0 h-[100svh] w-full ${
-            orbitEnabled ? "pointer-events-auto" : "pointer-events-none"
-          }`}
+        <a
+          href="#specs"
+          className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded focus:bg-steel-900 focus:px-4 focus:py-2 focus:text-sm"
         >
-          <SceneBoundary onFail={() => setReduced(true)}>
-            <Scene orbitEnabled={orbitEnabled} onReady={handleReady} />
-          </SceneBoundary>
-          {/* Scrim: keeps copy legible wherever the model happens to sit,
-              without flattening the render behind it. */}
-          <div
-            className="pointer-events-none absolute inset-0"
-            style={{
-              background:
-                "linear-gradient(to top, rgba(10,12,14,0.94) 0%, rgba(10,12,14,0.62) 26%, rgba(10,12,14,0) 58%)",
-            }}
-          />
-          <CalloutOverlay activeSection={section.id} />
-        </div>
+          ข้ามไปยังข้อมูลจำเพาะ
+        </a>
 
-        {/* Copy scrolls over the pinned scene. */}
-        <div className="pointer-events-none relative z-10" style={{ marginTop: "-100svh" }}>
-          <Hero />
-          <Overview />
-          <PartSections />
-          <Assembly />
-          <Specs />
-          <Closing />
-        </div>
-      </main>
-    </StaticMode.Provider>
+        <main className="relative">
+          {/* The 3D scene stays pinned for the whole document. */}
+          <div
+            className={`sticky top-0 z-0 h-[100svh] w-full ${
+              orbitEnabled ? "pointer-events-auto" : "pointer-events-none"
+            }`}
+          >
+            <SceneBoundary onFail={() => setReduced(true)}>
+              <Scene orbitEnabled={orbitEnabled} onReady={handleReady} />
+            </SceneBoundary>
+            {/* Scrim: keeps copy legible wherever the model happens to sit,
+                without flattening the render behind it. */}
+            <div
+              className="pointer-events-none absolute inset-0"
+              style={{
+                background:
+                  "linear-gradient(to top, rgba(10,12,14,0.94) 0%, rgba(10,12,14,0.62) 26%, rgba(10,12,14,0) 58%)",
+              }}
+            />
+            <CalloutOverlay activeSection={section.id} />
+          </div>
+
+          {/* Copy scrolls over the pinned scene. */}
+          <div className="pointer-events-none relative z-10" style={{ marginTop: "-100svh" }}>
+            <Hero />
+            <Overview />
+            <PartSections />
+            <Assembly />
+            <Specs />
+            <FilmSection />
+            <Closing />
+          </div>
+        </main>
+      </StaticMode.Provider>
+    </OverlayProvider>
   );
 }

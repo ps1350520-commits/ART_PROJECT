@@ -2,10 +2,10 @@
 
 import { useEffect, useMemo, useRef } from "react";
 import { CALLOUTS, calloutsForSection } from "@/content/callouts";
-import { SECTIONS, SECTION_RANGES } from "@/lib/sections";
+import { SECTIONS } from "@/lib/sections";
 import type { SectionId } from "@/lib/sections";
 import { readAnchor } from "@/lib/projection";
-import { getScroll, useMediaQuery } from "@/lib/scroll";
+import { getScroll, rangeOf, useMediaQuery } from "@/lib/scroll";
 
 /** Callouts shown over the canvas at once on a narrow screen. */
 const MOBILE_LIMIT = 2;
@@ -32,7 +32,7 @@ const sideForSection = (id: SectionId): -1 | 1 =>
  * panel during the crossfade.
  */
 const withinHold = (id: SectionId, progress: number) => {
-  const range = SECTION_RANGES[id];
+  const range = rangeOf(id);
   const section = SECTIONS.find((s) => s.id === id);
   const local = (progress - range.start) / (range.end - range.start || 1);
   return local <= (section?.holdUntil ?? 0.46) + 0.06;
@@ -207,7 +207,7 @@ export default function CalloutOverlay({ activeSection }: { activeSection: Secti
           className="pointer-events-none absolute leading-tight"
           style={{ opacity: 0, transition: "opacity 420ms ease" }}
         >
-          <p className="text-[0.8rem] font-medium text-steel-200">{callout.label.th}</p>
+          <p className="text-[0.8rem] font-medium text-steel-200 phone:text-[0.68rem]">{callout.label.th}</p>
           <p className="text-[0.68rem] text-steel-400" lang="en">
             {callout.label.en}
           </p>
@@ -217,11 +217,11 @@ export default function CalloutOverlay({ activeSection }: { activeSection: Secti
 
       {/* Narrow screens: labels move out from under the model. */}
       {isNarrow && mobileList.length > 0 && (
-        <div className="pointer-events-none absolute inset-x-0 bottom-4 flex flex-col gap-1.5 px-4">
+        <div className="pointer-events-none absolute inset-x-0 bottom-4 flex flex-col gap-1.5 px-4 phone:bottom-2 phone:gap-1 phone:px-2.5">
           {mobileList.map((callout) => (
             <div
               key={callout.id}
-              className="rounded border border-steel-700/70 bg-steel-950/80 px-3 py-2 backdrop-blur-sm"
+              className="rounded border border-steel-700/70 bg-steel-950/80 px-3 py-2 backdrop-blur-sm phone:px-2 phone:py-1.5"
             >
               <p className="text-[0.8rem] font-medium text-steel-200">
                 <span className="mr-2 inline-block h-1.5 w-1.5 rounded-full bg-ember align-middle" />
@@ -230,7 +230,7 @@ export default function CalloutOverlay({ activeSection }: { activeSection: Secti
                   {callout.label.en}
                 </span>
               </p>
-              <p className="mt-0.5 text-[0.7rem] text-steel-400">{callout.detail.th}</p>
+              <p className="mt-0.5 text-[0.7rem] text-steel-400 phone:text-[0.6rem]">{callout.detail.th}</p>
             </div>
           ))}
         </div>
