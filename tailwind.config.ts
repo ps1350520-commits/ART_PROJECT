@@ -8,16 +8,6 @@ const config: Config = {
   ],
   theme: {
     extend: {
-      screens: {
-        /**
-         * Phone-sized viewports, in either orientation: narrow in portrait,
-         * or short in landscape. Every mobile-only rule hangs off this one
-         * variant, so nothing in it can reach a desktop window.
-         */
-        phone: {
-          raw: "(max-width: 767px), (max-height: 500px) and (orientation: landscape)",
-        },
-      },
       colors: {
         steel: {
           950: "#0a0c0e",

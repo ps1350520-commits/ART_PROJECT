@@ -169,7 +169,7 @@ export default function FilmSection() {
         className={
           isStatic
             ? "mx-auto w-full max-w-5xl px-5 py-16 sm:px-8"
-            : "sticky top-0 flex h-[100svh] w-full items-center justify-center px-4 phone:px-3 sm:px-8"
+            : "sticky top-0 flex h-[100svh] w-full items-center justify-center px-4 sm:px-8"
         }
       >
         {/* The blackout: the model recedes and the screen is handed over. */}
@@ -191,14 +191,14 @@ export default function FilmSection() {
           <p className="eyebrow">
             {FILM.eyebrow.th} · <span lang="en">{FILM.eyebrow.en}</span>
           </p>
-          <h2 id="film-heading" className="mt-2 text-xl font-light text-steel-200 phone:mt-1 phone:text-[0.95rem] sm:text-2xl">
+          <h2 id="film-heading" className="mt-2 text-xl font-light text-steel-200 sm:text-2xl">
             {FILM.heading.th}
-            <span className="ml-3 text-[0.8rem] text-steel-400 phone:ml-2 phone:text-[0.62rem]" lang="en">
+            <span className="ml-3 text-[0.8rem] text-steel-400" lang="en">
               {FILM.heading.en}
             </span>
           </h2>
 
-          <div className="relative mt-4 overflow-hidden rounded-sm border border-steel-700/70 bg-black phone:mt-2 phone:flex phone:justify-center">
+          <div className="relative mt-4 overflow-hidden rounded-sm border border-steel-700/70 bg-black">
             <video
               ref={videoRef}
               src={FILM.src}
@@ -207,7 +207,7 @@ export default function FilmSection() {
               playsInline
               muted={muted}
               controls={isStatic}
-              className="block h-auto w-full phone:mx-auto phone:max-h-[54svh] phone:w-auto"
+              className="block h-auto w-full"
               onLoadedMetadata={(e) => setDuration(e.currentTarget.duration)}
               onTimeUpdate={(e) => setElapsed(e.currentTarget.currentTime)}
               onPlay={() => setPaused(false)}
@@ -246,15 +246,15 @@ export default function FilmSection() {
 
           {!isStatic && (
             <>
-              <div className="mt-3 h-px w-full bg-steel-800 phone:mt-2">
+              <div className="mt-3 h-px w-full bg-steel-800">
                 <div
                   className="h-full bg-ember"
                   style={{ width: `${played * 100}%`, transition: "width 220ms linear" }}
                 />
               </div>
 
-              <div className="mt-3 flex items-center justify-between gap-4 phone:mt-2 phone:gap-2">
-                <p className="text-[0.7rem] text-steel-400 phone:text-[0.58rem]">
+              <div className="mt-3 flex items-center justify-between gap-4">
+                <p className="text-[0.7rem] text-steel-400">
                   {caught ? FILM.catchNote.th : FILM.hint.th}
                   <span className="ml-2 text-steel-500" lang="en">
                     {caught ? FILM.catchNote.en : FILM.hint.en}
@@ -264,7 +264,7 @@ export default function FilmSection() {
                 <button
                   type="button"
                   onClick={toggleSound}
-                  className="shrink-0 rounded-sm border border-steel-700/70 px-3 py-1.5 text-[0.66rem] uppercase tracking-widest2 text-steel-300 transition-colors phone:px-2 phone:py-1 phone:text-[0.55rem] hover:border-ember/60 hover:text-ember"
+                  className="shrink-0 rounded-sm border border-steel-700/70 px-3 py-1.5 text-[0.66rem] uppercase tracking-widest2 text-steel-300 transition-colors hover:border-ember/60 hover:text-ember"
                 >
                   {muted ? FILM.sound.th : FILM.muted.th}
                 </button>

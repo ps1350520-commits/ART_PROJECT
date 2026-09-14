@@ -210,7 +210,7 @@ function RoundButton({
       type="button"
       aria-label={label}
       onClick={onClick}
-      className={`flex h-11 w-11 items-center justify-center rounded-full border border-steel-700/70 bg-steel-950/80 text-steel-300 backdrop-blur transition-colors phone:h-9 phone:w-9 hover:border-ember/60 hover:text-ember ${className}`}
+      className={`flex h-11 w-11 items-center justify-center rounded-full border border-steel-700/70 bg-steel-950/80 text-steel-300 backdrop-blur transition-colors hover:border-ember/60 hover:text-ember ${className}`}
     >
       {children}
     </button>
@@ -278,13 +278,13 @@ function PhotoView({
           </RoundButton>
         )}
         <div className="min-w-0 flex-1 text-center">
-          <p id="overlay-title" className="text-sm font-light text-steel-200 phone:text-[0.76rem]">
+          <p id="overlay-title" className="text-sm font-light text-steel-200">
             {photo.title.th}
             <span className="ml-2 text-[0.72rem] text-steel-400" lang="en">
               {photo.title.en}
             </span>
           </p>
-          <p className="mt-1 text-[0.72rem] leading-relaxed text-steel-400 phone:mt-0.5 phone:text-[0.6rem]">{photo.alt.th}</p>
+          <p className="mt-1 text-[0.72rem] leading-relaxed text-steel-400">{photo.alt.th}</p>
         </div>
         {many && (
           <RoundButton label="ภาพถัดไป" onClick={() => onStep(1)} className="shrink-0">
@@ -310,9 +310,9 @@ function ReaderView({
       {/* The pane never grows past the viewport: the header stays put and
           the copy scrolls inside it. */}
       <div className="panel pointer-events-auto flex max-h-full w-full max-w-2xl flex-col bg-steel-950/95">
-        <div className="flex shrink-0 items-start justify-between gap-4 border-b border-steel-700/70 px-5 py-4 phone:px-3 phone:py-2.5 sm:px-7">
+        <div className="flex shrink-0 items-start justify-between gap-4 border-b border-steel-700/70 px-5 py-4 sm:px-7">
           <div className="min-w-0">
-            <h2 id="overlay-title" className="text-xl font-light text-steel-200 phone:text-[1rem] sm:text-2xl">
+            <h2 id="overlay-title" className="text-xl font-light text-steel-200 sm:text-2xl">
               {view.title}
             </h2>
             {view.subtitle && (
@@ -327,7 +327,7 @@ function ReaderView({
             </span>
           </RoundButton>
         </div>
-        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 py-5 phone:px-3 phone:py-3 sm:px-7 sm:py-6">
+        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 py-5 sm:px-7 sm:py-6">
           {view.body}
         </div>
       </div>

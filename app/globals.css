@@ -93,38 +93,6 @@
   }
 }
 
-/**
- * Phones, in either orientation. The page is composed for a wide screen,
- * so on a small one every shared surface steps down a size — the panels
- * keep their proportions instead of swallowing the viewport. Matches the
- * `phone` screen in tailwind.config.ts; desktop never sees any of it.
- */
-@media (max-width: 767px), (max-height: 500px) and (orientation: landscape) {
-  .eyebrow {
-    @apply text-[0.58rem];
-  }
-
-  .body-th {
-    @apply text-[0.78rem] leading-snug;
-  }
-
-  .body-en {
-    @apply text-[0.68rem] leading-snug;
-  }
-
-  .read-more {
-    @apply px-2.5 py-1.5 text-[0.58rem];
-  }
-
-  .missing {
-    @apply px-1 py-0 text-[0.68rem];
-  }
-
-  .photo-caption {
-    @apply px-2.5 pb-2 pt-7;
-  }
-}
-
 @keyframes load-sweep {
   0% {
     transform: translateX(-120%);

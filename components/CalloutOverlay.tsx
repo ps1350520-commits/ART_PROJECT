@@ -207,7 +207,7 @@ export default function CalloutOverlay({ activeSection }: { activeSection: Secti
           className="pointer-events-none absolute leading-tight"
           style={{ opacity: 0, transition: "opacity 420ms ease" }}
         >
-          <p className="text-[0.8rem] font-medium text-steel-200 phone:text-[0.68rem]">{callout.label.th}</p>
+          <p className="text-[0.8rem] font-medium text-steel-200">{callout.label.th}</p>
           <p className="text-[0.68rem] text-steel-400" lang="en">
             {callout.label.en}
           </p>
@@ -217,11 +217,11 @@ export default function CalloutOverlay({ activeSection }: { activeSection: Secti
 
       {/* Narrow screens: labels move out from under the model. */}
       {isNarrow && mobileList.length > 0 && (
-        <div className="pointer-events-none absolute inset-x-0 bottom-4 flex flex-col gap-1.5 px-4 phone:bottom-2 phone:gap-1 phone:px-2.5">
+        <div className="pointer-events-none absolute inset-x-0 bottom-4 flex flex-col gap-1.5 px-4">
           {mobileList.map((callout) => (
             <div
               key={callout.id}
-              className="rounded border border-steel-700/70 bg-steel-950/80 px-3 py-2 backdrop-blur-sm phone:px-2 phone:py-1.5"
+              className="rounded border border-steel-700/70 bg-steel-950/80 px-3 py-2 backdrop-blur-sm"
             >
               <p className="text-[0.8rem] font-medium text-steel-200">
                 <span className="mr-2 inline-block h-1.5 w-1.5 rounded-full bg-ember align-middle" />
@@ -230,7 +230,7 @@ export default function CalloutOverlay({ activeSection }: { activeSection: Secti
                   {callout.label.en}
                 </span>
               </p>
-              <p className="mt-0.5 text-[0.7rem] text-steel-400 phone:text-[0.6rem]">{callout.detail.th}</p>
+              <p className="mt-0.5 text-[0.7rem] text-steel-400">{callout.detail.th}</p>
             </div>
           ))}
         </div>

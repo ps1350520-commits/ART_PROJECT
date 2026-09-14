@@ -1,46 +1,29 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { MOBILE_GATE } from "@/content/site";
 import { useMediaQuery } from "@/lib/scroll";
 
 /**
- * Phones, portrait: the page is composed around a wide screen with the
- * model on one side and a panel on the other, which a portrait phone
- * cannot show. So the reader is asked to turn the device first, and
- * offered full screen while they are here — landscape plus full screen is
- * the closest a phone gets to the layout this was built for.
+ * Phones and small tablets: the page is composed for a desktop screen —
+ * the model in the middle of a wide frame with a panel beside it — and a
+ * phone-width viewport cannot carry that, so the reader is asked to turn
+ * on their browser's desktop mode rather than shown a cut-down version.
  *
- * It is a suggestion, not a wall: `MOBILE_GATE.dismiss` goes straight
- * through to the page, and turning the phone dismisses it by itself.
+ * The test is deliberately viewport-width based: switching a browser to
+ * desktop mode widens the layout viewport to around 980px, which takes it
+ * past `GATE` and dismisses this screen by itself.
+ *
+ * It stays a request, not a wall — `MOBILE_GATE.dismiss` goes through to
+ * the page for anyone whose browser has no such setting.
  */
+const GATE = "(pointer: coarse) and (max-width: 900px)";
+
 export default function MobileGate() {
-  const isPhone = useMediaQuery("(max-width: 767px), (max-height: 500px) and (orientation: landscape)");
-  const isPortrait = useMediaQuery("(orientation: portrait)");
+  const needsDesktop = useMediaQuery(GATE);
   const [dismissed, setDismissed] = useState(false);
 
-  // Turning the phone answers the question; nothing left to ask.
-  useEffect(() => {
-    if (!isPortrait) setDismissed(false);
-  }, [isPortrait]);
-
-  if (!isPhone || !isPortrait || dismissed) return null;
-
-  const goFullscreen = async () => {
-    try {
-      if (!document.fullscreenElement) {
-        await document.documentElement.requestFullscreen();
-      }
-      // Only available inside full screen, and only on some phones.
-      const orientation = screen.orientation as ScreenOrientation & {
-        lock?: (to: string) => Promise<void>;
-      };
-      await orientation.lock?.("landscape");
-    } catch {
-      // Either step may be refused; the reader can still turn the phone.
-    }
-    setDismissed(true);
-  };
+  if (!needsDesktop || dismissed) return null;
 
   return (
     <div
@@ -49,34 +32,11 @@ export default function MobileGate() {
       aria-labelledby="gate-heading"
       className="fixed inset-0 z-[70] flex touch-none flex-col items-center justify-center overscroll-none bg-steel-950 px-8 text-center"
     >
-      {/* A phone turning on its side. */}
-      <svg
-        viewBox="0 0 96 64"
-        className="h-20 w-28 text-ember"
-        fill="none"
-        aria-hidden="true"
-      >
-        <rect
-          x="20"
-          y="8"
-          width="56"
-          height="36"
-          rx="7"
-          stroke="currentColor"
-          strokeWidth="3"
-        />
-        <path
-          d="M34 56c4 3 9 4 14 4s10-1 14-4"
-          stroke="currentColor"
-          strokeWidth="2.5"
-          strokeLinecap="round"
-          opacity="0.75"
-        />
-        <path
-          d="M62 60l6-3-1 6z"
-          fill="currentColor"
-          opacity="0.75"
-        />
+      {/* A desktop screen on its stand. */}
+      <svg viewBox="0 0 96 72" className="h-20 w-24 text-ember" fill="none" aria-hidden="true">
+        <rect x="8" y="6" width="80" height="50" rx="6" stroke="currentColor" strokeWidth="3" />
+        <path d="M38 62h20M48 56v6" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
+        <path d="M32 68h32" stroke="currentColor" strokeWidth="3" strokeLinecap="round" opacity="0.6" />
       </svg>
 
       <h2 id="gate-heading" className="mt-7 text-lg font-semibold text-ember">
@@ -90,18 +50,26 @@ export default function MobileGate() {
         {MOBILE_GATE.body.th}
       </p>
 
-      <button
-        type="button"
-        onClick={goFullscreen}
-        className="mt-8 rounded-full border-2 border-ember bg-ember/10 px-8 py-3 text-[0.92rem] font-semibold text-ember transition-colors active:bg-ember/20"
-      >
-        {MOBILE_GATE.fullscreen.th}
-      </button>
+      <ul className="mt-7 w-full max-w-xs space-y-2.5 text-left">
+        {MOBILE_GATE.steps.map((step) => (
+          <li
+            key={step.browser}
+            className="rounded-sm border border-steel-700/70 bg-steel-900/60 px-4 py-3"
+          >
+            <p className="text-[0.66rem] uppercase tracking-widest2 text-steel-500">
+              {step.browser}
+            </p>
+            <p className="mt-1 text-[0.82rem] leading-relaxed text-steel-200">{step.how.th}</p>
+          </li>
+        ))}
+      </ul>
+
+      <p className="mt-6 text-[0.74rem] text-steel-500">{MOBILE_GATE.after.th}</p>
 
       <button
         type="button"
         onClick={() => setDismissed(true)}
-        className="mt-5 text-[0.74rem] text-steel-500 underline decoration-steel-700 underline-offset-4"
+        className="mt-6 text-[0.74rem] text-steel-600 underline decoration-steel-700 underline-offset-4"
       >
         {MOBILE_GATE.dismiss.th}
       </button>

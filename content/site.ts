@@ -669,15 +669,31 @@ export const VEHICLE_SPECS: SpecRow[] = [
 
 /* --------------------------- mobile gate ---------------------------- */
 
-/** The portrait-phone screen that asks for landscape before the page. */
+/** The screen a phone gets, asking for the browser's desktop mode. */
 export const MOBILE_GATE = {
-  heading: { th: "หมุนจอเป็นแนวนอน", en: "Turn your phone sideways" },
+  heading: { th: "โปรดเปิดโหมดเดสก์ท็อป", en: "Please switch to desktop mode" },
   body: {
-    th: "หน้านี้จัดวางสำหรับจอแนวนอน โมเดลจะอยู่กลางจอและคำอธิบายอยู่ด้านข้าง",
-    en: "This page is laid out for a landscape screen: the model in the middle, the notes beside it.",
+    th: "หน้านี้ออกแบบสำหรับจอคอมพิวเตอร์ โมเดลอยู่กลางจอและคำอธิบายอยู่ด้านข้าง จอมือถือจึงแสดงได้ไม่ครบ",
+    en: "This page is built for a desktop screen: the model in the middle, the notes beside it.",
   },
-  fullscreen: { th: "เข้าโหมดเต็มจอ", en: "Go full screen" },
-  dismiss: { th: "ดูแบบแนวตั้งต่อไป", en: "Carry on in portrait" },
+  steps: [
+    {
+      browser: "Chrome · Android",
+      how: { th: "แตะปุ่ม ⋮ มุมขวาบน แล้วติ๊ก “เว็บไซต์เดสก์ท็อป”", en: "Tap ⋮, then tick Desktop site." },
+    },
+    {
+      browser: "Safari · iPhone",
+      how: {
+        th: "แตะ ᴀA ข้างช่องที่อยู่เว็บ แล้วเลือก “ขอเว็บไซต์เดสก์ท็อป”",
+        en: "Tap ᴀA beside the address bar, then Request Desktop Website.",
+      },
+    },
+  ],
+  after: {
+    th: "เปิดแล้วหน้าจะโหลดใหม่เอง แนะนำให้หมุนจอเป็นแนวนอนด้วย",
+    en: "The page reloads by itself; landscape helps too.",
+  },
+  dismiss: { th: "ดูต่อแบบนี้", en: "Carry on anyway" },
 } as const;
 
 /* ------------------------------- film ------------------------------- */
